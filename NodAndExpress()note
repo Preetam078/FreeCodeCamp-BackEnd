@@ -1,0 +1,183 @@
+-----> Meet the Node console
+
+var express = require('express');
+var app = express();
+
+console.log("Hello World")
+
+module.exports = app;
+
+-----> Start a Working Express Server
+
+fundamental method is app.listen(port). Express, routes takes the following structure: app.METHOD(PATH, HANDLER).
+METHOD is an http method in lowercase.
+PATH is a relative path on the server (it can be a string, or even a regular expression).
+HANDLER is a function that Express calls when the route is matched. Handlers take the form function(req, res) {...},
+where req is the request object, and res is the response object
+
+app.get("/",function(req, res) {
+res.send("Hello Express");
+})
+
+-----> Serve an HTML File
+
+You can respond to requests with a file using the res.sendFile(path) method.
+You can put it inside the app.get('/', ...) route handler
+this method will set the appropriate headers to instruct your browser on how to handle the file you want to send
+This method needs an absolute file path. We recommend you to use the Node global variable \_\_dirname to calculate the path **\*\*\***(IMPORTANT)
+
+app.get("/",function(req, res) {
+res.sendFile( \_\_dirname + "/views/index.html" )
+})
+
+-----> Serve Static Assets
+An HTML server usually has one or more directories that are accessible by the user.
+You can place there the static assets needed by your application (stylesheets, scripts, images).
+n Express, you can put in place this functionality using the middleware express.static(path)
+middleware are functions that intercept route handlers, adding some kind of information
+middleware needs to be mounted using the method app.use(path, middlewareFunction)
+The first path argument is optional. If you don’t pass it, the middleware will be executed for all requests
+
+// Normal usage
+app.use(express.static(\_\_dirname + "/public"));
+
+// Assets at the /public route
+app.use("/public", express.static(\_\_dirname + "/public"));
+
+------>Serve JSON on a Specific Route
+
+These days, the preferred data format for moving information around the web is JSON.
+Simply put,JSON is a convenient way to represent a JavaScript object as a string, so it can be easily transmitted.
+
+create a simple API by creating a route that responds with JSON
+You can do it as usual, with the app.get() method. Inside the route handler, use the method res.json()
+
+app.get("/json", (req, res) => {
+res.json({
+message: "Hello json"
+});
+});
+
+----> Use the .env File
+
+he .env file is a hidden file that is used to pass environment variables to your application. This file is secret
+used to store data that you want to keep private or hidden.
+For example, you can store API keys from external services or your database URI
+
+The environment variables are accessible from the app as process.env.VAR_NAME. (**Important**)
+The process.env object is a global Node object, and variables are passed as strings. By convention,
+tExpand Your Project with External Packages fhe variable names are all uppercase, with words separated by an underscore
+
+MESSAGE_STYLE=uppercase (.env file in the root directory)
+
+app.get("/json" , (req,res) => {
+
+    if(process.env.MESSAGE_STYLE === "uppercase"){
+        res.json({
+        "message":"HELLO JSON"
+      })
+    }
+    else{
+        res.json({
+        "message":"Hello json"
+      })
+    }
+
+})
+
+------> Implement a Root-Level Request Logger Middleware
+
+Middleware functions are functions that take 3 arguments:
+tExpand Your Project with External Packages fhe request object, the response object, and the next function in the application’s request-response cycle.
+start the execution of the next function in the stack. This triggers calling the 3rd argument, next().
+
+app.use((req, res, next) => {
+console.log(res.json());
+next()
+});
+
+-----> Chain Middleware to Create a Time Server
+Middleware can also be chained inside route definition
+This approach is useful to split the server operations into smaller units
+That leads to a better app structure, and the possibility to reuse code in different places
+
+app.get("/now",(req,res,next)=> {
+req.time = new Date().toString();
+next();
+},(req,res)=>{
+res.send({time:req.time})
+})
+
+------>Get Route Parameter Input from the Client
+
+When building an API, we have to allow users to communicate to us what they want to get from our service
+For example, if the client is requesting information about a user stored in the database,
+they need a way to let us know which user they're interested in
+Route parameters are named segments of the URL, delimited by slashes (/)
+The captured values can be found in the req.params object.
+
+route_path: '/user/:userId/book/:bookId'
+actual_request_URL: '/user/546/book/6754'
+req.params: {userId: '546', bookId: '6754'}
+
+app.get("/:word/echo",(req,res) => {
+
+const {word} = req.params;
+res.json({
+echo: word
+});
+})
+
+-------> Get Query Parameter Input from the Client
+
+Another common way to get input from the client is by encoding the data after the route path, using a query string
+The query string is delimited by a question mark (?), and includes field=value couples
+Each couple is separated by an ampersand (&)
+Express can parse the data from the query string, and populate the object req.query
+
+route_path: '/library'
+actual_request_URL: '/library?userId=546&bookId=6754'
+req.query: {userId: '546', bookId: '6754'}
+
+app.get("/name",(req,res) => {
+var firstName = req.query.first;
+var lastName = req.query.last;
+
+res.json({
+name: `${firstName} ${lastName}`
+});
+})
+
+
+
+-------> Use body - parser to Parse POST Requests
+POST is the default method used to send client data with HTML forms.
+In these kind of requests, the data doesn’t appear in the URL, it is hidden in the request body.
+The body is a part of the HTTP request, also called the payload
+Even though the data is not visible in the URL, this does not mean that it is private.
+To see why, look at the raw content of an HTTP POST request:
+With Ajax, you can also use JSON to handle data having a more complex structure
+install the body - parser package.This package allows you to use a series of middleware,
+ which can decode data in different formats.
+
+ app.use(bodyParser.urlencoded({extended: false}))
+
+
+
+-------> Get Data from POST Requests
+ 
+app.route("/name")
+.get((req,res) => {
+var firstName = req.query.first;
+  var lastName = req.query.last;
+  
+  res.json({
+    name: `${firstName} ${lastName}`
+  });
+})
+.post((req,res) => {
+  console.log(req.body.first)
+  res.json({name: `${req.body.first} ${req.body.last}`})
+})
+
+

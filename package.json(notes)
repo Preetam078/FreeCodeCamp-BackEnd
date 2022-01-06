@@ -1,0 +1,99 @@
+FREECODECAMP BACKEND SUMMARY
+
+----> How to Use package.json, the Core of Any Node.js Project or npm Package
+
+he package.json file is the center of any Node.js project or npm package. 
+It stores information about your project.It consists of a single JSON object where information is stored in key-value pairs
+One of the most common pieces of information in this file is the author field. It specifies who created the project,
+and can consist of a string or an object with contact or other details
+
+"author": "Jane Doe",
+
+
+
+----> Add a Description to Your package.json
+
+If you some day plan to publish a package to npm, 
+this is the string that should sell your idea to the user when they decide whether to install your package or not.
+However, that’s not the only use case for the description, it’s a great way to summarize what a project does
+
+"description": "A project that does something awesome",
+
+
+
+
+----> Add Keywords to Your package.json
+
+The keywords field is where you can describe your project using related keywords.
+this field is structured as an array of double-quoted strings.
+
+"keywords": [ "descriptive", "related", "words" ],
+
+
+
+
+-----> Add a License to Your package.json
+
+The license field is where you inform users of what they are allowed to do with your project.License information is not required,
+ and copyright laws in most countries will give you ownership of what you create by default. 
+However, it’s always a good practice to explicitly state what users can and can’t do.
+
+
+"license": "MIT",
+
+
+
+-----> Add a Version to Your package.json
+
+This field describes the current version of your project
+
+"version": "1.2.0",
+
+
+
+-----> Expand Your Project with External Packages from npm
+
+how can npm know exactly what your project needs? Meet the dependencies section of your package.json file.
+
+"dependencies": {
+  "package-name": "version",
+  "express": "4.14.0"
+}
+
+
+
+
+-----> Manage npm Dependencies By Understanding Semantic Versioning
+
+Versions of the npm packages in the dependencies section of your package.json file follow what’s called Semantic Versioning (SemVer), 
+an industry standard for software versioning aiming to make it easier to manage dependencies. Libraries, 
+frameworks or other tools published on npm should use SemVer in order to clearly communicate what kind of changes projects can expect if they update.
+
+"package": "MAJOR.MINOR.PATCH"
+"moment": "2.10.2",
+
+
+
+----> Use the Tilde-Character to Always Use the Latest Patch Version of a Dependency
+
+To allow an npm dependency to update to the latest PATCH version, you can prefix the dependency’s version with the tilde (~) character
+
+"moment": "~2.10.2",
+
+
+
+
+-----> Use the Caret-Character(XOR) to Use the Latest Minor Version of a Dependency
+
+"moment": "^2.10.2",
+
+
+
+
+-----> Remove a Package from Your Dependencies
+
+ just remove the corresponding key-value pair for that package from your dependencies
+
+
+
+

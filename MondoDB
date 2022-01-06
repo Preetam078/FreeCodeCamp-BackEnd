@@ -1,0 +1,221 @@
+------> Install and Set Up Mongoose
+Add mongodb@~3.6.0 and mongoose@~5.4.0 to the project’s package.json.
+Then, require mongoose as mongoose in myApp.js
+Create a .env file and add a MONGO_URI variable to it.
+Its value should be your MongoDB Atlas database URI
+
+connect to the database using the following syntax
+
+mongoose.connect(<Your URI>, { useNewUrlParser: true, useUnifiedTopology: true }); ///
+
+const mySecret = process.env['MONGO_URI']
+mongoose.connect(mySecret, { useNewUrlParser: true, useUnifiedTopology: true });
+
+------> CRUD Part I - CREATE
+First of all we need a Schema. Each schema maps to a MongoDB collection
+It defines the shape of the documents within that collection.
+Schemas are building block for Models.
+A model allows you to create instances of your objects, called documents.
+
+const {Schema} = mongoose;
+
+const personSchema = new Schema({
+
+name: {
+type:String,
+requred: true
+},
+age:{
+type:Number
+},
+favoriteFoods:{
+type:[String]
+}
+})
+
+const Person = mongoose.model("Person" , personSchema);
+
+------> Create and Save a Record of a Model
+Their types must conform to the ones in the personSchema. Then, call the method document.save()
+The done() function is a callback that tells us that we can proceed after completing an asynchronous operation
+such as inserting, searching, updating, or deleting.
+It's following the Node convention, and should be called as done(null, data) on success, or done(err) on error.
+
+const createAndSave = (done) => {
+
+let preetam = new Person({
+name:"preetam",
+age:21,
+favoriteFoods:["pasta","maggi","chicken"]
+})
+
+preetam.save(function(err,data){
+
+    if(err){
+      console.error(err);
+    }
+    else{
+      done(null,data);
+    }
+
+});
+
+}
+
+-----> Create Many Records with model.create()
+Model.create() takes an array of objects like [{name: 'John', ...}, {...}, ...] as the first argument,
+and saves them all in the db
+
+var arrayOfPeople = [
+{name: "Frankie", age: 74, favoriteFoods: ["Del Taco"]},
+{name: "Sol", age: 76, favoriteFoods: ["roast chicken"]},
+{name: "Robert", age: 78, favoriteFoods: ["wine"]}
+];
+
+var createManyPeople = function(arrayOfPeople, done) {
+Person.create(arrayOfPeople, function (err, people) {
+if (err) return console.log(err);
+done(null, people);
+});
+};
+
+------>Use model.find() to Search Your Database
+Model.find() accepts a query document (a JSON object) as the first argument, then a callback.
+
+const findPeopleByName = (personName, done) => {
+
+Person.find({name:personName} , function(err, personFound ){
+if(err){
+return console.error(err);
+}
+else{
+done(null, personFound);
+}
+})
+};
+
+------>Use model.findOne() to Return a Single Matching Document from Your Database
+Model.findOne() behaves like Model.find(), but it returns only one document (not an array)
+
+const findOneByFood = (food, done) => {
+Person.findOne({favoriteFoods:food}, function(err, foodFound){
+if(err){
+console.error(err);
+}
+else {
+done(null,foodFound);
+}
+})
+};
+
+------->Use model.findById() to Search Your Database By \_id
+Searching by \_id is an extremely frequent operation, so Mongoose provides a dedicated method for it.
+
+const findPersonById = (personId, done) => {
+Person.findById({\_id:personId}, function(err, idFound){
+if(err){
+return console.error(err);
+}
+else {
+done(null,idFound);
+}
+})
+};
+
+--------> Perform Classic Updates by Running Find, Edit, then Save
+Mongoose has a dedicated updating method: Model.update()
+
+const findEditThenSave = (personId, done) => {
+const foodToAdd = "hamburger";
+
+Person.findById({\_id:personId}, function(err, person){
+if(err){
+return console.error(err);
+}
+else{
+person.favoriteFoods.push(foodToAdd);
+person.save(function(err, updatedData) {
+if(err){
+return console.error(err);
+}
+else{
+done(null, updatedData);
+}
+})
+}
+})
+};
+
+---------> Perform New Updates on a Document Using model.findOneAndUpdate()
+You should return the updated document. To do that,
+you need to pass the options document { new: true } as the 3rd argument to findOneAndUpdate().
+By default, these methods return the unmodified object.
+
+const findAndUpdate = (personName, done) => {
+const ageToSet = 20;
+
+Person.findOneAndUpdate({name:personName}, {age:ageToSet}, {new :true}, (err, updated) => {
+if(err){
+return console.error(err);
+}
+else{
+done(null, updated);  
+ }
+})
+
+};
+
+------> Delete One Document Using model.findByIdAndRemove
+findByIdAndRemove and findOneAndRemove
+
+const removeManyPeople = (done) => {
+const nameToRemove = "Mary";
+
+done(null /_, data_/);
+};
+
+const queryChain = (done) => {
+const foodToSearch = "burrito";
+
+done(null /_, data_/);
+};
+
+-------> Delete Many Documents with model.remove()
+delete all the people whose name is within the variable nameToRemove, using Model.remove()
+
+const removeManyPeople = (done) => {
+const nameToRemove = "Mary";
+
+Person.remove({name:nameToRemove},(err, removed) => {
+if(err){
+return console.error(err);
+}
+else {
+done(null , removed);
+}
+})
+};
+
+-----> Chain Search Query Helpers to Narrow Search Results
+If you don’t pass the callback as the last argument to Model.find() (or to the other search methods),
+the query is not executed.
+You can store the query in a variable for later use. This kind of object enables you to build up a query using chaining syntax
+The actual db search is executed when you finally chain the method .exec()
+
+const queryChain = (done) => {
+const foodToSearch = "burrito";
+
+Person
+.find({favoriteFoods:foodToSearch})
+.sort('name')
+.limit(2)
+.select(['name','favoriteFoods'])
+.exec((err, data) => {
+if(err){
+console.error(err);
+}
+else {
+done(null,data);
+}
+})
+};
